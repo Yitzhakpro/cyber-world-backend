@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
+import rootRouter from './routes';
 
 const createServer = () => {
     const server = fastify();
@@ -10,6 +11,7 @@ const createServer = () => {
     // decorators
     // hooks
     // my services
+    server.register(rootRouter);
 
     return server;
 };
