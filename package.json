@@ -18,7 +18,9 @@
     "dependencies": {
         "@fastify/cors": "^7.0.0",
         "convict": "^6.2.3",
-        "fastify": "^3.29.0"
+        "fastify": "^3.29.0",
+        "fastify-plugin": "^3.0.1",
+        "mongoose": "^6.3.4"
     },
     "devDependencies": {
         "@types/convict": "^6.1.1",

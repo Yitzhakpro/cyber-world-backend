@@ -20,6 +20,26 @@ const config = convict({
         default: 8080,
         env: 'PORT',
     },
+    database: {
+        mongodb: {
+            ip: {
+                doc: 'The ip of the mongodb',
+                default: '127.0.0.1',
+                env: 'MONGODB_HOST',
+            },
+            port: {
+                doc: 'The port for the mongodb',
+                format: 'port',
+                default: 27017,
+                env: 'MONGODB_PORT',
+            },
+            name: {
+                doc: 'Name of the mongodb database',
+                default: 'cyber-world',
+                env: 'MONGODB_DATABASE_NAME',
+            },
+        },
+    },
 });
 
 const env = config.get('env');
