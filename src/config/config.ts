@@ -51,4 +51,6 @@ if (fs.existsSync(configPath)) {
     console.warn(`Could not find "${env}" config file or it should not exist anyway.`);
 }
 
+config.validate();
+
 export default config;
