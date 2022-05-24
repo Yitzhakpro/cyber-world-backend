@@ -1,21 +1,5 @@
-import mongoose, { Model } from 'mongoose';
-
-interface IUser {
-    email: string;
-    username: string;
-    password: string;
-    birthDate: Date;
-    rank: 'owner' | 'mod' | 'helper' | 'user';
-
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-interface IUserMethods {
-    getInfo(): { username: string; createdAt: Date };
-}
-
-type UserModel = Model<IUser, Record<string, unknown>, IUserMethods>;
+import mongoose from 'mongoose';
+import { IUser, IUserMethods, UserModel } from './types';
 
 const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
     {
