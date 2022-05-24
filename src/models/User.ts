@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { IUser, IUserMethods, UserModel } from './types';
+import { IUser, IUserMethods, UserModel, GetInfoReturn } from './types';
 
 const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
     {
@@ -43,8 +43,13 @@ userSchema.pre('save', async function (this, next) {
     }
 });
 
-userSchema.method('getInfo', function getInfo(this: IUser): { username: string; createdAt: Date } {
-    return { username: this.username, createdAt: this.createdAt };
+userSchema.method('getInfo', function getInfo(this: IUser): GetInfoReturn {
+    const { username, rank, birthDate, createdAt } = this;
+
+    const diffInMS = new Date().getTime() - birthDate.getTime();
+    const age = Math.trunc(diffInMS / 31_556_952_000); // 31,556,952,000 milliseconds in year
+
+    return { username, rank, above18: age >= 18, memberSince: createdAt };
 });
 
 userSchema.method('checkPassword', async function checkPassword(this: IUser, password: string): Promise<boolean> {

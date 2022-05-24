@@ -1,4 +1,6 @@
+import type { GetInfoReturn } from '../../models';
+
 export interface LoginResponse {
     success: boolean;
-    userInfo?: { username: string; createdAt: Date };
+    userInfo?: GetInfoReturn;
 }

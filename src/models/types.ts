@@ -1,5 +1,7 @@
 import type { Model } from 'mongoose';
 // User
+type Rank = 'owner' | 'mod' | 'helper' | 'user';
+
 export interface IUser {
     email: string;
     username: string;
@@ -11,8 +13,15 @@ export interface IUser {
     updatedAt: Date;
 }
 
+export interface GetInfoReturn {
+    username: string;
+    rank: Rank;
+    above18: boolean;
+    memberSince: Date;
+}
+
 export interface IUserMethods {
-    getInfo(): { username: string; createdAt: Date };
+    getInfo(): GetInfoReturn;
     checkPassword(password: string): Promise<boolean>;
 }
 
