@@ -47,6 +47,17 @@ userSchema.method('getInfo', function getInfo(this: IUser): { username: string; 
     return { username: this.username, createdAt: this.createdAt };
 });
 
+userSchema.method('checkPassword', async function checkPassword(this: IUser, password: string): Promise<boolean> {
+    try {
+        const isPassCorrect = await bcrypt.compare(password, this.password);
+
+        return isPassCorrect;
+    } catch (err) {
+        // TODO: better error
+        throw new Error('Failed to verify password');
+    }
+});
+
 const User = mongoose.model<IUser, UserModel>('User', userSchema);
 
 export default User;

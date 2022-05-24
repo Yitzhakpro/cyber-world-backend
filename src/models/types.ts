@@ -13,6 +13,7 @@ export interface IUser {
 
 export interface IUserMethods {
     getInfo(): { username: string; createdAt: Date };
+    checkPassword(password: string): Promise<boolean>;
 }
 
 export type UserModel = Model<IUser, Record<string, unknown>, IUserMethods>;
