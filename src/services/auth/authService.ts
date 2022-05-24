@@ -1,12 +1,13 @@
 import { UserDAL } from '../user';
-import { LoginResponse } from './types';
+import { RegisterResponse, LoginResponse } from './types';
 
 // TODO: better errors
 
-export const register = async (email: string, username: string, password: string, birthDate: string) => {
+export const register = async (email: string, username: string, password: string, birthDate: string): Promise<RegisterResponse> => {
     const createdUser = await UserDAL.createUser(email, username, password, birthDate);
+    const createdUserInfo = createdUser.getInfo();
 
-    return createdUser;
+    return { userInfo: createdUserInfo };
 };
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
