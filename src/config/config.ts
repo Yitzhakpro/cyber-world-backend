@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import convict from 'convict';
 import path from 'path';
 import fs from 'fs';
