@@ -12,7 +12,7 @@ export const register = async (email: string, username: string, password: string
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
     const user = await UserDAL.getUserByEmail(email);
     if (!user) {
-        throw new Error('Wrong credentials');
+        return { success: false }; // email is wrong
     }
 
     const isPassCorrect = await user.checkPassword(password);
