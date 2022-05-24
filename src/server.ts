@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
 import { dbConnections } from './plugins';
 import rootRouter from './routes';
@@ -13,6 +14,7 @@ const createServer = () => {
 
     // fastify ecosystem
     server.register(fastifyCors, corsConfig);
+    server.register(fastifyCookie);
     server.register(fastifyJwt, { secret: accessTokenSecret });
     // my plugins
     server.register(dbConnections);

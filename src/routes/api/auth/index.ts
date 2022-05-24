@@ -9,7 +9,10 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         const registeredUserInfo = await authService.register(email, username, password, birthDate);
 
-        reply.send(registeredUserInfo);
+        // TODO: move amount of seconds to config
+        const token = fastify.jwt.sign(registeredUserInfo, { expiresIn: 300 }); // 5 mins
+
+        reply.setCookie('accessToken', token).send(registeredUserInfo);
     });
 
     fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, async (request, reply) => {
@@ -17,7 +20,13 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         const loginStatus = await authService.login(email, password);
 
-        reply.send(loginStatus);
+        if (loginStatus.success) {
+            // TODO: move amount of seconds to config
+            const token = fastify.jwt.sign({ ...loginStatus.userInfo }, { expiresIn: 300 }); // 5 mins
+            reply.setCookie('accessToken', token, { secure: true, expires: new Date('2022-06-24'), httpOnly: true }).send(loginStatus);
+        } else {
+            reply.send(loginStatus);
+        }
     });
 
     done();
