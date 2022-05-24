@@ -2,6 +2,10 @@ import { FastifyPluginCallback } from 'fastify';
 import { authService } from '../../../services';
 import { IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
+import config from '../../../config';
+
+const jwtConfig = config.get('auth.jwt.options');
+const accessTokenName = config.get('auth.cookie.name');
 
 const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
     fastify.post<{ Body: IRegisterBody }>('/register', { schema: registerSchema }, async (request, reply) => {
@@ -9,10 +13,9 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         const registeredUserInfo = await authService.register(email, username, password, birthDate);
 
-        // TODO: move amount of seconds to config
-        const token = fastify.jwt.sign(registeredUserInfo, { expiresIn: 300 }); // 5 mins
+        const token = fastify.jwt.sign(registeredUserInfo, jwtConfig);
 
-        reply.setCookie('accessToken', token).send(registeredUserInfo);
+        reply.setCookie(accessTokenName, token).send(registeredUserInfo);
     });
 
     fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, async (request, reply) => {
@@ -21,9 +24,8 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
         const loginStatus = await authService.login(email, password);
 
         if (loginStatus.success) {
-            // TODO: move amount of seconds to config
-            const token = fastify.jwt.sign({ ...loginStatus.userInfo }, { expiresIn: 300 }); // 5 mins
-            reply.setCookie('accessToken', token, { secure: true, expires: new Date('2022-06-24'), httpOnly: true }).send(loginStatus);
+            const token = fastify.jwt.sign({ ...loginStatus.userInfo }, jwtConfig);
+            reply.setCookie(accessTokenName, token, { secure: true, expires: new Date('2022-06-24'), httpOnly: true }).send(loginStatus);
         } else {
             reply.send(loginStatus);
         }
