@@ -12,10 +12,12 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
         reply.send({ registeredUser });
     });
 
-    fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, (request, reply) => {
+    fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, async (request, reply) => {
         const { email, password, rememberMe } = request.body;
 
-        reply.send({ email, password });
+        const loginStatus = await authService.login(email, password);
+
+        reply.send(loginStatus);
     });
 
     done();
