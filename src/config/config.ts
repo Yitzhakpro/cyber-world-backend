@@ -33,6 +33,15 @@ const config = convict({
             env: 'CORS_CREDENTIALS',
         },
     },
+    auth: {
+        jwt: {
+            secret: {
+                doc: 'The secret of jwt',
+                default: 'cyber-world-secret',
+                env: 'ACCESS_TOKEN_SECRET',
+            },
+        },
+    },
     database: {
         mongodb: {
             ip: {
