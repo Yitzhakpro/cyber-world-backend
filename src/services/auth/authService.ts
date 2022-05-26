@@ -1,7 +1,18 @@
 import { UserDAL } from '../user';
-import { RegisterResponse, LoginResponse } from './types';
+import { IsAuthenticatedResponse, RegisterResponse, LoginResponse } from './types';
 
 // TODO: better errors
+
+export const isAuthenticated = async (username: string): Promise<IsAuthenticatedResponse> => {
+    const user = await UserDAL.getUserByUsername(username);
+    if (!user) {
+        return { loggedIn: false };
+    }
+
+    const userInfo = user.getInfo();
+
+    return { loggedIn: true, userInfo };
+};
 
 export const register = async (email: string, username: string, password: string, birthDate: string): Promise<RegisterResponse> => {
     const createdUser = await UserDAL.createUser(email, username, password, birthDate);

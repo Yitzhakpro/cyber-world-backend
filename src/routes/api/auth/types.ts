@@ -1,3 +1,14 @@
+// general
+// TODO: figure out better way to type the decoded token
+export interface DecodedToken {
+    username: string;
+    rank: string;
+    above18: boolean;
+    memberSince: Date;
+    iat: number;
+    exp: number;
+}
+
 // register
 export interface IRegisterBody {
     email: string;

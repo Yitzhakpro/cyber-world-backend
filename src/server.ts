@@ -8,6 +8,7 @@ import config from './config';
 
 const corsConfig = config.get('cors');
 const accessTokenSecret = config.get('auth.jwt.secret');
+const accessTokenName = config.get('auth.cookie.name');
 
 const createServer = () => {
     const server = fastify({ logger: true, pluginTimeout: 100000 });
@@ -15,7 +16,13 @@ const createServer = () => {
     // fastify ecosystem
     server.register(fastifyCors, corsConfig);
     server.register(fastifyCookie);
-    server.register(fastifyJwt, { secret: accessTokenSecret });
+    server.register(fastifyJwt, {
+        secret: accessTokenSecret,
+        cookie: {
+            cookieName: accessTokenName,
+            signed: false,
+        },
+    });
     // my plugins
     server.register(dbConnections);
     // decorators

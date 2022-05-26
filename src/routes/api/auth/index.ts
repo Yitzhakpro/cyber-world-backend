@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from 'fastify';
 import { authService } from '../../../services';
-import { IRegisterBody, ILoginBody } from './types';
+import { DecodedToken, IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
 import config from '../../../config';
 
@@ -8,6 +8,18 @@ const jwtConfig = config.get('auth.jwt.options');
 const accessTokenName = config.get('auth.cookie.name');
 
 const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
+    fastify.get('/isAuthenticated', async (request, reply) => {
+        try {
+            await request.jwtVerify();
+            const { username } = request.user as DecodedToken;
+            const IsAuthenticatedResponse = await authService.isAuthenticated(username);
+
+            reply.send(IsAuthenticatedResponse);
+        } catch (err) {
+            reply.send({ loggedIn: false });
+        }
+    });
+
     fastify.post<{ Body: IRegisterBody }>('/register', { schema: registerSchema }, async (request, reply) => {
         const { email, username, password, birthDate, rememberMe } = request.body;
 
