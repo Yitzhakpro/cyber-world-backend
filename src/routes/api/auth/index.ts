@@ -6,6 +6,7 @@ import config from '../../../config';
 
 const jwtConfig = config.get('auth.jwt.options');
 const accessTokenName = config.get('auth.cookie.name');
+const accessCookieOptions = config.get('auth.cookie.options');
 
 const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
     fastify.get('/isAuthenticated', async (request, reply) => {
@@ -27,7 +28,7 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         const token = fastify.jwt.sign(registeredUserInfo, jwtConfig);
 
-        reply.setCookie(accessTokenName, token).send(registeredUserInfo);
+        reply.setCookie(accessTokenName, token, accessCookieOptions).send(registeredUserInfo);
     });
 
     fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, async (request, reply) => {
@@ -37,7 +38,7 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         if (loginStatus.success) {
             const token = fastify.jwt.sign({ ...loginStatus.userInfo }, jwtConfig);
-            reply.setCookie(accessTokenName, token, { secure: true, expires: new Date('2022-06-24'), httpOnly: true }).send(loginStatus);
+            reply.setCookie(accessTokenName, token, accessCookieOptions).send(loginStatus);
         } else {
             reply.send(loginStatus);
         }

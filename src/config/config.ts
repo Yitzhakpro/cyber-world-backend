@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import convict from 'convict';
+import convict, { Schema } from 'convict';
+import { CookieSerializeOptions } from '@fastify/cookie';
 import path from 'path';
 import fs from 'fs';
 
@@ -39,6 +40,20 @@ const config = convict({
                 doc: 'The name of the cookie',
                 default: 'accessToken',
             },
+            options: {
+                secure: {
+                    default: true,
+                },
+                httpOnly: {
+                    default: true,
+                },
+                path: {
+                    default: '/',
+                },
+                maxAge: {
+                    default: 300_000, // 5 mins
+                },
+            } as Schema<CookieSerializeOptions>,
         },
         jwt: {
             secret: {
