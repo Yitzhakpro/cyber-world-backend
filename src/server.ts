@@ -6,12 +6,24 @@ import { dbConnections } from '@plugins';
 import rootRouter from './routes';
 import config from '@config';
 
+const env = config.get('env');
 const corsConfig = config.get('cors');
 const accessTokenSecret = config.get('auth.jwt.secret');
 const accessTokenName = config.get('auth.cookie.name');
 
 const createServer = () => {
-    const server = fastify({ logger: true, pluginTimeout: 100000 });
+    const server = fastify({
+        logger: {
+            prettyPrint:
+                env === 'development'
+                    ? {
+                          translateTime: 'SYS:HH:MM:ss TT',
+                          ignore: 'pid,hostname',
+                      }
+                    : false,
+        },
+        pluginTimeout: 100000,
+    });
 
     // fastify ecosystem
     server.register(fastifyCors, corsConfig);
