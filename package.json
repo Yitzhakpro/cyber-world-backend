@@ -43,6 +43,7 @@
         "typescript": "^4.6.4"
     },
     "_moduleAliases": {
-        "@config": "src/config/index.ts"
+        "@config": "src/config/index.ts",
+        "@services": "src/services/index.ts"
     }
 }

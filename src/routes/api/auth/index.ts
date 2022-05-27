@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from 'fastify';
-import { authService } from '../../../services';
+import { authService } from '@services';
 import { IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
 import config from '@config';
