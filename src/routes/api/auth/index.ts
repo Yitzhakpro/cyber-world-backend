@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from 'fastify';
 import { authService } from '../../../services';
-import { DecodedToken, IRegisterBody, ILoginBody } from './types';
+import { IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
 import config from '../../../config';
 
@@ -12,7 +12,9 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
     fastify.get('/isAuthenticated', async (request, reply) => {
         try {
             await request.jwtVerify();
-            const { username } = request.user as DecodedToken;
+
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const { username } = request.user!;
             const IsAuthenticatedResponse = await authService.isAuthenticated(username);
 
             reply.send(IsAuthenticatedResponse);
