@@ -1,16 +1,28 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
+import fastifyJwt from '@fastify/jwt';
 import { dbConnections } from './plugins';
 import rootRouter from './routes';
 import config from './config';
 
 const corsConfig = config.get('cors');
+const accessTokenSecret = config.get('auth.jwt.secret');
+const accessTokenName = config.get('auth.cookie.name');
 
 const createServer = () => {
     const server = fastify({ logger: true, pluginTimeout: 100000 });
 
     // fastify ecosystem
     server.register(fastifyCors, corsConfig);
+    server.register(fastifyCookie);
+    server.register(fastifyJwt, {
+        secret: accessTokenSecret,
+        cookie: {
+            cookieName: accessTokenName,
+            signed: false,
+        },
+    });
     // my plugins
     server.register(dbConnections);
     // decorators
