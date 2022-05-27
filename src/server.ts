@@ -2,9 +2,9 @@ import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
-import { dbConnections } from './plugins';
+import { dbConnections } from '@plugins';
 import rootRouter from './routes';
-import config from './config';
+import config from '@config';
 
 const corsConfig = config.get('cors');
 const accessTokenSecret = config.get('auth.jwt.secret');

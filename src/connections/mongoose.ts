@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import config from '../config';
+import config from '@config';
 
 const { ip, port, name } = config.get('database.mongodb');
 const MONGO_URI = `mongodb://${ip}:${port}/${name}`;

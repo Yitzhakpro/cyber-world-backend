@@ -1,8 +1,8 @@
 import { FastifyPluginCallback } from 'fastify';
-import { authService } from '../../../services';
+import { authService } from '@services';
 import { IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
-import config from '../../../config';
+import config from '@config';
 
 const jwtConfig = config.get('auth.jwt.options');
 const accessTokenName = config.get('auth.cookie.name');

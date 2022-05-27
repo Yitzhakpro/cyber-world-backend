@@ -1,5 +1,6 @@
+import 'module-alias/register';
 import createServer from './server';
-import config from './config';
+import config from '@config';
 
 const IP = config.get('ip');
 const PORT = config.get('port');
