@@ -8,6 +8,15 @@ export const saveToken = async (username: string, token: string): Promise<void> 
     await AuthDAL.setUsernameToken(username, token);
 };
 
+export const getSavedUserToken = async (username: string): Promise<string> => {
+    const savedToken = await AuthDAL.getUserToken(username);
+    if (!savedToken) {
+        throw new Error('no token found');
+    }
+
+    return savedToken;
+};
+
 export const isAuthenticated = async (username: string): Promise<IsAuthenticatedResponse> => {
     const user = await UserDAL.getUserByUsername(username);
     if (!user) {

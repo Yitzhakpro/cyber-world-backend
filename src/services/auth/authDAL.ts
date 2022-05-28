@@ -10,6 +10,16 @@ class AuthDAL {
         this.redisClient = RedisClient.client;
     }
 
+    async getUserToken(username: string) {
+        try {
+            const token = await this.redisClient.get(username);
+
+            return token;
+        } catch (err) {
+            throw new Error('Could not get user token');
+        }
+    }
+
     async setUsernameToken(username: string, token: string) {
         try {
             await this.redisClient.setEx(username, 300, token);

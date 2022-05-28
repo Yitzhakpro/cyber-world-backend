@@ -11,16 +11,24 @@ const accessCookieOptions = config.get('auth.cookie.options');
 const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
     fastify.get('/activity', async (request, reply) => {
         // ? maybe prevent from re-issue token because of spamming
+        // TODO: better logic, maybe hook
         try {
             await request.jwtVerify();
+
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const { username } = request.user!;
+            const currentToken = request.cookies[accessTokenName];
+            const savedToken = await authService.getSavedUserToken(username);
 
-            const userInfo = await userService.getUserInfoByUsername(username);
-            const token = fastify.jwt.sign(userInfo, jwtConfig);
-            await authService.saveToken(username, token);
+            if (currentToken !== savedToken) {
+                reply.status(403).send('Invalid token');
+            } else {
+                const userInfo = await userService.getUserInfoByUsername(username);
+                const token = fastify.jwt.sign(userInfo, jwtConfig);
+                await authService.saveToken(username, token);
 
-            reply.setCookie(accessTokenName, token, accessCookieOptions).send(userInfo);
+                reply.setCookie(accessTokenName, token, accessCookieOptions).send(userInfo);
+            }
         } catch (err) {
             console.log('err: ', err);
             reply.status(500).send(err);
