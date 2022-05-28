@@ -50,9 +50,6 @@ const config = convict({
                 path: {
                     default: '/',
                 },
-                maxAge: {
-                    default: 300_000, // 5 mins
-                },
             } as Schema<CookieSerializeOptions>,
         },
         jwt: {
@@ -64,7 +61,7 @@ const config = convict({
             options: {
                 expiresIn: {
                     doc: 'The experation of the jwt cookie (300 secs = 5 mins)',
-                    default: 300,
+                    default: 300, // 300 secs = 5 mins
                 },
             },
         },
