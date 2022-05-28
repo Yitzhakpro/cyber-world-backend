@@ -4,12 +4,10 @@ export interface IRegisterBody {
     username: string;
     password: string;
     birthDate: string;
-    rememberMe: boolean;
 }
 
 // login
 export interface ILoginBody {
     email: string;
     password: string;
-    rememberMe: boolean;
 }
