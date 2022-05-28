@@ -1,7 +1,12 @@
+import AuthDAL from './authDAL';
 import { UserDAL } from '../user';
 import { IsAuthenticatedResponse, RegisterResponse, LoginResponse } from './types';
 
 // TODO: better errors
+
+export const saveToken = async (username: string, token: string): Promise<void> => {
+    await AuthDAL.setUsernameToken(username, token);
+};
 
 export const isAuthenticated = async (username: string): Promise<IsAuthenticatedResponse> => {
     const user = await UserDAL.getUserByUsername(username);

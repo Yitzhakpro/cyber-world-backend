@@ -26,11 +26,12 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
     fastify.post<{ Body: IRegisterBody }>('/register', { schema: registerSchema }, async (request, reply) => {
         const { email, username, password, birthDate } = request.body;
 
-        const registeredUserInfo = await authService.register(email, username, password, birthDate);
+        const registerStatus = await authService.register(email, username, password, birthDate);
 
-        const token = fastify.jwt.sign(registeredUserInfo, jwtConfig);
+        const token = fastify.jwt.sign({ ...registerStatus.userInfo }, jwtConfig);
+        await authService.saveToken(username, token);
 
-        reply.setCookie(accessTokenName, token, accessCookieOptions).send(registeredUserInfo);
+        reply.setCookie(accessTokenName, token, accessCookieOptions).send(registerStatus);
     });
 
     fastify.post<{ Body: ILoginBody }>('/login', { schema: loginSchema }, async (request, reply) => {
@@ -38,8 +39,11 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
 
         const loginStatus = await authService.login(email, password);
 
-        if (loginStatus.success) {
+        if (loginStatus.success && loginStatus.userInfo) {
+            const { username } = loginStatus.userInfo;
             const token = fastify.jwt.sign({ ...loginStatus.userInfo }, jwtConfig);
+            await authService.saveToken(username, token);
+
             reply.setCookie(accessTokenName, token, accessCookieOptions).send(loginStatus);
         } else {
             reply.send(loginStatus);
