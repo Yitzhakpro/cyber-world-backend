@@ -46,6 +46,7 @@
     },
     "_moduleAliases": {
         "@config": "src/config/index.ts",
+        "@databases": "src/databases/index.ts",
         "@plugins": "src/plugins/index.ts",
         "@services": "src/services/index.ts"
     }
