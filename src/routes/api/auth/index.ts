@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from 'fastify';
-import { authService } from '@services';
+import { userService, authService } from '@services';
 import { IRegisterBody, ILoginBody } from './types';
 import { registerSchema, loginSchema } from './schema';
 import config from '@config';
@@ -9,6 +9,24 @@ const accessTokenName = config.get('auth.cookie.name');
 const accessCookieOptions = config.get('auth.cookie.options');
 
 const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
+    fastify.get('/activity', async (request, reply) => {
+        // ? maybe prevent from re-issue token because of spamming
+        try {
+            await request.jwtVerify();
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const { username } = request.user!;
+
+            const userInfo = await userService.getUserInfoByUsername(username);
+            const token = fastify.jwt.sign(userInfo, jwtConfig);
+            await authService.saveToken(username, token);
+
+            reply.setCookie(accessTokenName, token, accessCookieOptions).send(userInfo);
+        } catch (err) {
+            console.log('err: ', err);
+            reply.status(500).send(err);
+        }
+    });
+
     fastify.get('/isAuthenticated', async (request, reply) => {
         try {
             await request.jwtVerify();
