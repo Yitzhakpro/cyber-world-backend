@@ -24,7 +24,8 @@
         "dotenv": "^16.0.1",
         "fastify": "^3.29.0",
         "fastify-plugin": "^3.0.1",
-        "mongoose": "^6.3.4"
+        "mongoose": "^6.3.4",
+        "redis": "^4.1.0"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.0",
