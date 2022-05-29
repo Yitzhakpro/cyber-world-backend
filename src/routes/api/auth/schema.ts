@@ -1,13 +1,12 @@
 // register
 const registerBody = {
     type: 'object',
-    required: ['email', 'username', 'password', 'birthDate', 'rememberMe'],
+    required: ['email', 'username', 'password', 'birthDate'],
     properties: {
         email: { type: 'string' },
         username: { type: 'string' },
         password: { type: 'string' },
         birthDate: { type: 'string' },
-        rememberMe: { type: 'boolean' },
     },
 };
 export const registerSchema = {
@@ -17,11 +16,10 @@ export const registerSchema = {
 // login
 const loginBody = {
     type: 'object',
-    required: ['email', 'password', 'rememberMe'],
+    required: ['email', 'password'],
     properties: {
         email: { type: 'string' },
         password: { type: 'string' },
-        rememberMe: { type: 'boolean' },
     },
 };
 export const loginSchema = {

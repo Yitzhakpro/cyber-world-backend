@@ -1,9 +1,4 @@
-import type { GetInfoReturn } from '../src/models';
-
-interface UserDecodedToken extends GetInfoReturn {
-    iat: number;
-    exp: number;
-}
+import { UserDecodedToken } from '../src/types';
 
 declare module 'fastify' {
     export interface FastifyRequest {

@@ -9,6 +9,7 @@ const MONGO_URI = `mongodb://${ip}:${port}/${name}`;
 const connectToMongo = async () => {
     try {
         await mongoose.connect(MONGO_URI, { connectTimeoutMS: 9000 });
+        console.log('[+] Connected to Mongodb');
     } catch (err: any) {
         throw err;
     }

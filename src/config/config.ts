@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import convict, { Schema } from 'convict';
 import { CookieSerializeOptions } from '@fastify/cookie';
+import { RedisClientOptions } from '@redis/client';
 import path from 'path';
 import fs from 'fs';
 
@@ -50,9 +51,6 @@ const config = convict({
                 path: {
                     default: '/',
                 },
-                maxAge: {
-                    default: 300_000, // 5 mins
-                },
             } as Schema<CookieSerializeOptions>,
         },
         jwt: {
@@ -64,7 +62,7 @@ const config = convict({
             options: {
                 expiresIn: {
                     doc: 'The experation of the jwt cookie (300 secs = 5 mins)',
-                    default: 300,
+                    default: 300, // 300 secs = 5 mins
                 },
             },
         },
@@ -87,6 +85,32 @@ const config = convict({
                 default: 'cyber-world',
                 env: 'MONGODB_DATABASE_NAME',
             },
+        },
+        redis: {
+            options: {
+                socket: {
+                    host: {
+                        doc: 'Redis server hostname',
+                        default: 'localhost',
+                        env: 'REDIS_HOSTNAME',
+                    },
+                    port: {
+                        doc: 'Redis server port',
+                        default: '6379',
+                        env: 'REDIS_PORT',
+                    },
+                },
+                username: {
+                    doc: 'ACL Username',
+                    default: '',
+                    env: 'REDIS_USERNAME',
+                },
+                password: {
+                    doc: 'ACL Password',
+                    default: '',
+                    env: 'REDIS_PASSWORD',
+                },
+            } as Schema<RedisClientOptions<Record<string, never>, Record<string, never>, Record<string, never>>>,
         },
     },
 });
