@@ -1,3 +1,4 @@
 import dbConnections from './dbConnections';
+import messaging from './messaging';
 
-export { dbConnections };
+export { dbConnections, messaging };
