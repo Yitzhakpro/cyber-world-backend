@@ -29,7 +29,7 @@ export default class SocketMessaingController {
                 const isVerified = await verifySavedToken(currentToken, username);
 
                 if (!isVerified) {
-                    next(new Error('access token not verified'));
+                    return next(new Error('access token not verified'));
                     // socket.disconnect();
                 }
 
