@@ -5,17 +5,27 @@ import Cookie from 'cookie';
 import { verifySavedToken } from '@utils';
 import { UserDecodedToken } from '@types';
 import { SocketCookies } from './types';
+import { Rank } from '../../models';
 
 // TODO: better error handling
 
+interface SocketUserData {
+    username: string;
+    rank: Rank;
+}
+
 export default class SocketMessaingController {
-    private socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
+    private socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>;
     private jwtUtility: JWT;
 
-    constructor(socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, jwtUtility: JWT) {
+    constructor(socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>, jwtUtility: JWT) {
         this.socketServer = socketServer;
         this.jwtUtility = jwtUtility;
 
+        /*
+            Middleware to verify the authentication of the user
+            also using for associate username and rank to socket
+        */
         this.socketServer.use(async (socket, next) => {
             const socketCookiesHeader = socket.handshake.headers.cookie || '';
             const socketCookies = Cookie.parse(socketCookiesHeader) as SocketCookies;
@@ -25,7 +35,7 @@ export default class SocketMessaingController {
             try {
                 const decodedToken = this.jwtUtility.decode(currentToken) as UserDecodedToken;
 
-                const { username } = decodedToken;
+                const { username, rank } = decodedToken;
                 const isVerified = await verifySavedToken(currentToken, username);
 
                 if (!isVerified) {
@@ -33,6 +43,9 @@ export default class SocketMessaingController {
                     // socket.disconnect();
                 }
 
+                // associate username and rank to socket object
+                socket.data.username = username;
+                socket.data.rank = rank;
                 next();
             } catch (err) {
                 next(new Error('Could not verify'));
@@ -40,10 +53,10 @@ export default class SocketMessaingController {
         });
 
         this.socketServer.on('connection', (socket) => {
-            console.log('Client connected');
+            console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
             socket.on('disconnect', (reason) => {
-                console.log(`Client disconncted, reason: ${reason}`);
+                console.log(`[${socket.data.rank}]${socket.data.username} disconncted, reason: ${reason}`);
             });
         });
     }
