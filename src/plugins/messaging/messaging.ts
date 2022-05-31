@@ -2,9 +2,9 @@ import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { Server } from 'socket.io';
 import Cookie from 'cookie';
-import { verifySavedToken } from '../../utils';
+import { verifySavedToken } from '@utils';
 import config from '@config';
-import { UserDecodedToken } from '../../types';
+import { UserDecodedToken } from '@types';
 
 // TODO: Add better errors
 

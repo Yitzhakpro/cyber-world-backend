@@ -47,7 +47,9 @@
         "typescript": "^4.6.4"
     },
     "_moduleAliases": {
+        "@types": "src/types/index.ts",
         "@config": "src/config/index.ts",
+        "@utils": "src/utils/index.ts",
         "@databases": "src/databases/index.ts",
         "@plugins": "src/plugins/index.ts",
         "@services": "src/services/index.ts"
