@@ -57,6 +57,10 @@ export default class SocketMessaingController {
                 this.enterRoom(roomID, enterMode, socket);
             });
 
+            socket.on('leave_room', () => {
+                this.leaveRoom(socket);
+            });
+
             socket.on('message', (message) => {
                 const { username = 'USER', rank = 'user' } = socket.data;
                 const currentRoom = [...socket.rooms][1];
@@ -71,21 +75,6 @@ export default class SocketMessaingController {
 
                 console.log(`${username} sent: ${message} to: ${currentRoom}`);
                 this.socketServer.to(currentRoom).emit('message_recieved', messageData);
-            });
-
-            socket.on('disconnecting', (reason) => {
-                const { username = 'USER', rank = 'user' } = socket.data;
-                const currentRoom = [...socket.rooms][1];
-
-                const disconnectMessage: MessageData = {
-                    id: nanoid(),
-                    username,
-                    rank,
-                    text: 'Left the room',
-                    timestamp: new Date(),
-                };
-
-                this.socketServer.to(currentRoom).emit('message_recieved', disconnectMessage);
             });
 
             socket.on('disconnect', (reason) => {
@@ -135,5 +124,22 @@ export default class SocketMessaingController {
         console.log(`[v] '${socket.data.username}' joined room: ${roomID}`);
         socket.to(roomID).emit('message_recieved', joinMessage);
         return socket.emit('joined_successfully');
+    }
+
+    private leaveRoom(socket: ClientMessageSocket): void {
+        const { username = 'USER', rank = 'user' } = socket.data;
+        const currentRoom = [...socket.rooms][1];
+
+        socket.leave(currentRoom);
+
+        const disconnectMessage: MessageData = {
+            id: nanoid(),
+            username,
+            rank,
+            text: 'Left the room',
+            timestamp: new Date(),
+        };
+        console.log(`[v] 'test' left room: ${currentRoom}`);
+        this.socketServer.to(currentRoom).emit('message_recieved', disconnectMessage);
     }
 }
