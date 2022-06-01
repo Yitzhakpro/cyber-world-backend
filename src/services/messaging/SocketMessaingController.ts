@@ -55,6 +55,10 @@ export default class SocketMessaingController {
         this.socketServer.on('connection', (socket) => {
             console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
+            socket.on('message', (message: string) => {
+                console.log(`${socket.data.username} sent: ${message}`);
+            });
+
             socket.on('disconnect', (reason) => {
                 console.log(`[${socket.data.rank}]${socket.data.username} disconncted, reason: ${reason}`);
             });
