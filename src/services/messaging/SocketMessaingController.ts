@@ -9,13 +9,26 @@ import { Rank } from '../../models';
 
 // TODO: better error handling
 
+interface ClientToServerEvents {
+    join_room: (roomID: string) => void;
+    message: (message: string) => void;
+}
+
+interface ServerToClientEvents {
+    // join logic
+    join_failed: (reason: string) => void;
+    joined_successfully: () => void;
+    // message logic
+    message_recieved: (message: string) => void;
+}
+
 interface SocketUserData {
     username: string;
     rank: Rank;
 }
 
 export default class SocketMessaingController {
-    private socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>;
+    private socketServer: Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
     private jwtUtility: JWT;
 
     constructor(socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>, jwtUtility: JWT) {
@@ -55,7 +68,7 @@ export default class SocketMessaingController {
         this.socketServer.on('connection', (socket) => {
             console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
-            socket.on('join_room', (roomID: string) => {
+            socket.on('join_room', (roomID) => {
                 const alreadyInRoom = this.checkIfAlreadyInRoom(socket);
 
                 if (alreadyInRoom) {
@@ -68,7 +81,7 @@ export default class SocketMessaingController {
                 }
             });
 
-            socket.on('message', (message: string) => {
+            socket.on('message', (message) => {
                 const currentRoom = [...socket.rooms][1];
 
                 console.log(`${socket.data.username} sent: ${message} to: ${currentRoom}`);
