@@ -38,7 +38,6 @@ export default class SocketMessaingController {
 
                 if (!isVerified) {
                     return next(new Error('access token not verified'));
-                    // socket.disconnect();
                 }
 
                 // associate username and rank to socket object
@@ -75,6 +74,10 @@ export default class SocketMessaingController {
 
                 console.log(`${username} sent: ${message} to: ${currentRoom}`);
                 this.socketServer.to(currentRoom).emit('message_recieved', messageData);
+            });
+
+            socket.on('disconnecting', () => {
+                this.leaveRoom(socket);
             });
 
             socket.on('disconnect', (reason) => {
