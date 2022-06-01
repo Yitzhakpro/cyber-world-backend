@@ -2,30 +2,12 @@ import { Server, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { JWT } from '@fastify/jwt';
 import Cookie from 'cookie';
+import { nanoid } from 'nanoid';
 import { verifySavedToken } from '@utils';
 import { UserDecodedToken } from '@types';
-import { SocketCookies } from './types';
-import { Rank } from '../../models';
+import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies } from './types';
 
 // TODO: better error handling
-
-interface ClientToServerEvents {
-    join_room: (roomID: string) => void;
-    message: (message: string) => void;
-}
-
-interface ServerToClientEvents {
-    // join logic
-    join_failed: (reason: string) => void;
-    joined_successfully: () => void;
-    // message logic
-    message_recieved: (message: string) => void;
-}
-
-interface SocketUserData {
-    username: string;
-    rank: Rank;
-}
 
 export default class SocketMessaingController {
     private socketServer: Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
@@ -82,10 +64,19 @@ export default class SocketMessaingController {
             });
 
             socket.on('message', (message) => {
+                const { username = 'USER', rank = 'user' } = socket.data;
                 const currentRoom = [...socket.rooms][1];
 
-                console.log(`${socket.data.username} sent: ${message} to: ${currentRoom}`);
-                this.socketServer.to(currentRoom).emit('message_recieved', message);
+                const messageData = {
+                    id: nanoid(),
+                    username,
+                    rank,
+                    text: message,
+                    timestamp: new Date(),
+                };
+
+                console.log(`${username} sent: ${message} to: ${currentRoom}`);
+                this.socketServer.to(currentRoom).emit('message_recieved', messageData);
             });
 
             socket.on('disconnect', (reason) => {
