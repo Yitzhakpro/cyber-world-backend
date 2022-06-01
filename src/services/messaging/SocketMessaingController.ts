@@ -69,7 +69,10 @@ export default class SocketMessaingController {
             });
 
             socket.on('message', (message: string) => {
-                console.log(`${socket.data.username} sent: ${message}`);
+                const currentRoom = [...socket.rooms][1];
+
+                console.log(`${socket.data.username} sent: ${message} to: ${currentRoom}`);
+                this.socketServer.to(currentRoom).emit('message_recieved', message);
             });
 
             socket.on('disconnect', (reason) => {
