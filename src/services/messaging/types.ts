@@ -1,6 +1,8 @@
 import { Rank } from '../../models';
 
 // util types
+export type EnterMode = 'create' | 'join';
+
 export interface MessageData {
     id: string;
     username: string;
@@ -21,7 +23,7 @@ export interface SocketUserData {
 
 // events
 export interface ClientToServerEvents {
-    join_room: (roomID: string) => void;
+    enter_room: (roomID: string, enterMode: EnterMode) => void;
     message: (message: string) => void;
 }
 

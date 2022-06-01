@@ -5,15 +5,18 @@ import Cookie from 'cookie';
 import { nanoid } from 'nanoid';
 import { verifySavedToken } from '@utils';
 import { UserDecodedToken } from '@types';
-import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, MessageData } from './types';
+import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, EnterMode, MessageData } from './types';
 
 // TODO: better error handling
 
+type ServerMessageSocket = Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
+type ClientMessageSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>;
+
 export default class SocketMessaingController {
-    private socketServer: Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
+    private socketServer: ServerMessageSocket;
     private jwtUtility: JWT;
 
-    constructor(socketServer: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>, jwtUtility: JWT) {
+    constructor(socketServer: ServerMessageSocket, jwtUtility: JWT) {
         this.socketServer = socketServer;
         this.jwtUtility = jwtUtility;
 
@@ -50,27 +53,8 @@ export default class SocketMessaingController {
         this.socketServer.on('connection', (socket) => {
             console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
-            socket.on('join_room', (roomID) => {
-                const { username = 'USER', rank = 'user' } = socket.data;
-                const alreadyInRoom = this.checkIfAlreadyInRoom(socket);
-
-                if (alreadyInRoom) {
-                    console.log(`[!] '${socket.data.username}' can't join room: ${roomID} because he is already in a room`);
-                    socket.emit('join_failed', 'you already in room, try to refresh your browser');
-                } else {
-                    const joinMessage: MessageData = {
-                        id: nanoid(),
-                        username,
-                        rank,
-                        text: 'Joined the room',
-                        timestamp: new Date(),
-                    };
-
-                    socket.join(roomID);
-                    console.log(`[v] '${socket.data.username}' joined room: ${roomID}`);
-                    socket.to(roomID).emit('message_recieved', joinMessage);
-                    socket.emit('joined_successfully');
-                }
+            socket.on('enter_room', (roomID, enterMode) => {
+                this.enterRoom(roomID, enterMode, socket);
             });
 
             socket.on('message', (message) => {
@@ -112,11 +96,44 @@ export default class SocketMessaingController {
         });
     }
 
-    checkIfAlreadyInRoom(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>): boolean {
+    private checkIfRoomExists(roomID: string): boolean {
+        if (this.socketServer.sockets.adapter.rooms.has(roomID)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private checkIfAlreadyInRoom(socket: ClientMessageSocket): boolean {
         if (socket.rooms.size > 1) {
             return true;
         }
 
         return false;
+    }
+
+    private enterRoom(roomID: string, enterMode: EnterMode, socket: ClientMessageSocket): boolean {
+        const { username = 'USER', rank = 'user' } = socket.data;
+
+        if (enterMode === 'create' && this.checkIfRoomExists(roomID)) {
+            console.log(`[!] '${socket.data.username}' can't create room: ${roomID} because this room already exists`);
+            return socket.emit('create_failed', 'this room already exists, try a different id');
+        } else if (enterMode === 'join' && this.checkIfAlreadyInRoom(socket)) {
+            console.log(`[!] '${socket.data.username}' can't create room: ${roomID} because he is already inside a room`);
+            return socket.emit('create_failed', 'You are already in another room, try to quit / refresh your browser');
+        }
+
+        const joinMessage: MessageData = {
+            id: nanoid(),
+            username,
+            rank,
+            text: 'Joined the room',
+            timestamp: new Date(),
+        };
+
+        socket.join(roomID);
+        console.log(`[v] '${socket.data.username}' joined room: ${roomID}`);
+        socket.to(roomID).emit('message_recieved', joinMessage);
+        return socket.emit('joined_successfully');
     }
 }
