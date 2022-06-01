@@ -1,7 +1,7 @@
 import { Rank } from '../../models';
 
 // util types
-interface MessageData {
+export interface MessageData {
     id: string;
     username: string;
     rank: string;

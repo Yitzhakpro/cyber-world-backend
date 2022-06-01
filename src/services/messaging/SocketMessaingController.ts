@@ -5,7 +5,7 @@ import Cookie from 'cookie';
 import { nanoid } from 'nanoid';
 import { verifySavedToken } from '@utils';
 import { UserDecodedToken } from '@types';
-import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies } from './types';
+import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, MessageData } from './types';
 
 // TODO: better error handling
 
@@ -51,14 +51,24 @@ export default class SocketMessaingController {
             console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
             socket.on('join_room', (roomID) => {
+                const { username = 'USER', rank = 'user' } = socket.data;
                 const alreadyInRoom = this.checkIfAlreadyInRoom(socket);
 
                 if (alreadyInRoom) {
                     console.log(`[!] '${socket.data.username}' can't join room: ${roomID} because he is already in a room`);
                     socket.emit('join_failed', 'you already in room, try to refresh your browser');
                 } else {
+                    const joinMessage: MessageData = {
+                        id: nanoid(),
+                        username,
+                        rank,
+                        text: 'Joined the room',
+                        timestamp: new Date(),
+                    };
+
                     socket.join(roomID);
                     console.log(`[v] '${socket.data.username}' joined room: ${roomID}`);
+                    socket.to(roomID).emit('message_recieved', joinMessage);
                     socket.emit('joined_successfully');
                 }
             });
@@ -67,7 +77,7 @@ export default class SocketMessaingController {
                 const { username = 'USER', rank = 'user' } = socket.data;
                 const currentRoom = [...socket.rooms][1];
 
-                const messageData = {
+                const messageData: MessageData = {
                     id: nanoid(),
                     username,
                     rank,
@@ -79,8 +89,25 @@ export default class SocketMessaingController {
                 this.socketServer.to(currentRoom).emit('message_recieved', messageData);
             });
 
+            socket.on('disconnecting', (reason) => {
+                const { username = 'USER', rank = 'user' } = socket.data;
+                const currentRoom = [...socket.rooms][1];
+
+                const disconnectMessage: MessageData = {
+                    id: nanoid(),
+                    username,
+                    rank,
+                    text: 'Left the room',
+                    timestamp: new Date(),
+                };
+
+                this.socketServer.to(currentRoom).emit('message_recieved', disconnectMessage);
+            });
+
             socket.on('disconnect', (reason) => {
-                console.log(`[${socket.data.rank}]${socket.data.username} disconncted, reason: ${reason}`);
+                const { username = 'USER', rank = 'user' } = socket.data;
+
+                console.log(`[${rank}]${username} disconncted, reason: ${reason}`);
             });
         });
     }
