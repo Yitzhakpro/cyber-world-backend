@@ -61,19 +61,7 @@ export default class SocketMessaingController {
             });
 
             socket.on('message', (message) => {
-                const { username = 'USER', rank = 'user' } = socket.data;
-                const currentRoom = [...socket.rooms][1];
-
-                const messageData: MessageData = {
-                    id: nanoid(),
-                    username,
-                    rank,
-                    text: message,
-                    timestamp: new Date(),
-                };
-
-                console.log(`${username} sent: ${message} to: ${currentRoom}`);
-                this.socketServer.to(currentRoom).emit('message_recieved', messageData);
+                this.sendMessage(socket, message);
             });
 
             socket.on('disconnecting', () => {
@@ -147,5 +135,21 @@ export default class SocketMessaingController {
         };
         console.log(`[v] 'test' left room: ${currentRoom}`);
         this.socketServer.to(currentRoom).emit('message_recieved', disconnectMessage);
+    }
+
+    private sendMessage(socket: ClientMessageSocket, message: string): void {
+        const { username = 'USER', rank = 'user' } = socket.data;
+        const currentRoom = [...socket.rooms][1];
+
+        const messageData: MessageData = {
+            id: nanoid(),
+            username,
+            rank,
+            text: message,
+            timestamp: new Date(),
+        };
+
+        console.log(`${username} sent: ${message} to: ${currentRoom}`);
+        this.socketServer.to(currentRoom).emit('message_recieved', messageData);
     }
 }
