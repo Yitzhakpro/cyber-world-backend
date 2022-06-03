@@ -10,7 +10,7 @@ import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCooki
 // TODO: better error handling
 
 type ServerMessageSocket = Server<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
-type ClientMessageSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketUserData>;
+type ClientMessageSocket = Socket<DefaultEventsMap, ServerToClientEvents, DefaultEventsMap, SocketUserData>;
 
 export default class SocketMessaingController {
     private socketServer: ServerMessageSocket;
@@ -108,11 +108,14 @@ export default class SocketMessaingController {
         const { username = 'USER', rank = 'user' } = socket.data;
 
         if (enterMode === 'create' && this.checkIfRoomExists(roomID)) {
-            console.log(`[!] '${socket.data.username}' can't create room: ${roomID} because this room already exists`);
-            return socket.emit('create_failed', 'this room already exists, try a different id');
+            console.log(`[!] '${username}' can't create room: ${roomID} because this room already exists`);
+            return socket.emit('join_failed', 'This room already exists, try a different id');
+        } else if (enterMode === 'join' && !this.checkIfRoomExists(roomID)) {
+            console.log(`[!] '${username}' can't join room: ${roomID} because this room doesn't exist`);
+            return socket.emit('join_failed', 'This room ID does not exist, try to enter the correct one');
         } else if (enterMode === 'join' && this.checkIfAlreadyInRoom(socket)) {
-            console.log(`[!] '${socket.data.username}' can't create room: ${roomID} because he is already inside a room`);
-            return socket.emit('create_failed', 'You are already in another room, try to quit / refresh your browser');
+            console.log(`[!] '${username}' can't join room: ${roomID} because he is already inside a room`);
+            return socket.emit('join_failed', 'You are already in another room, try to quit / refresh your browser');
         }
 
         const joinMessage: MessageData = {
