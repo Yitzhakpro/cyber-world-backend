@@ -23,12 +23,14 @@ export interface SocketUserData {
 
 // events
 export interface ClientToServerEvents {
+    get_all_rooms: () => void;
     enter_room: (roomID: string, enterMode: EnterMode) => void;
     leave_room: () => void;
     message: (message: string) => void;
 }
 
 export interface ServerToClientEvents {
+    all_rooms: (allRooms: string[]) => void;
     // join logic
     join_failed: (reason: string) => void;
     joined_successfully: () => void;

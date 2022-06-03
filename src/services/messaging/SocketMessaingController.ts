@@ -4,6 +4,7 @@ import { JWT } from '@fastify/jwt';
 import Cookie from 'cookie';
 import { nanoid } from 'nanoid';
 import { verifySavedToken } from '@utils';
+import { getAllRooms } from './utils';
 import { UserDecodedToken } from '@types';
 import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, EnterMode, MessageData } from './types';
 
@@ -52,6 +53,10 @@ export default class SocketMessaingController {
         this.socketServer.on('connection', (socket) => {
             console.log(`[${socket.data.rank}]${socket.data.username} connected`);
 
+            socket.on('get_all_rooms', () => {
+                this.getAllRooms(socket);
+            });
+
             socket.on('enter_room', (roomID, enterMode) => {
                 this.enterRoom(roomID, enterMode, socket);
             });
@@ -74,6 +79,13 @@ export default class SocketMessaingController {
                 console.log(`[${rank}]${username} disconncted, reason: ${reason}`);
             });
         });
+    }
+
+    private getAllRooms(socket: ClientMessageSocket): void {
+        const socketServerRooms = this.socketServer.sockets.adapter.rooms;
+        const allRooms = getAllRooms(socketServerRooms);
+
+        socket.emit('all_rooms', allRooms);
     }
 
     private checkIfRoomExists(roomID: string): boolean {
