@@ -1,6 +1,6 @@
 import type { Model } from 'mongoose';
 // User
-type Rank = 'owner' | 'mod' | 'helper' | 'user';
+export type Rank = 'owner' | 'mod' | 'helper' | 'user';
 
 export interface IUser {
     email: string;

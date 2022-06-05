@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
-import { dbConnections } from '@plugins';
+import { dbConnections, messaging } from '@plugins';
 import verifySavedToken from './decorators';
 import rootRouter from './routes';
 import config from '@config';
@@ -38,6 +38,7 @@ const createServer = () => {
     });
     // my plugins
     server.register(dbConnections);
+    server.register(messaging);
     // decorators
     server.register(verifySavedToken);
     // hooks

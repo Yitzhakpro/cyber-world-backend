@@ -36,6 +36,13 @@ const authRoutes: FastifyPluginCallback = (fastify, opts, done) => {
             const { username } = request.user!;
             const IsAuthenticatedResponse = await authService.isAuthenticated(username);
 
+            const { loggedIn, userInfo } = IsAuthenticatedResponse;
+            if (loggedIn && userInfo) {
+                const token = fastify.jwt.sign(userInfo, jwtConfig);
+                await authService.saveToken(username, token);
+                reply.setCookie(accessTokenName, token, accessCookieOptions);
+            }
+
             reply.send(IsAuthenticatedResponse);
         } catch (err) {
             reply.send({ loggedIn: false });
