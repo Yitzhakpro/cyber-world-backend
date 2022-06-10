@@ -69,6 +69,10 @@ export default class SocketMessaingController {
                 this.sendMessage(socket, message);
             });
 
+            socket.on('kick', (username, reason = 'no reason') => {
+                this.kick(socket, username, reason);
+            });
+
             socket.on('disconnecting', () => {
                 this.leaveRoom(socket);
             });
@@ -86,6 +90,24 @@ export default class SocketMessaingController {
         const allRooms = getAllRooms(socketServerRooms);
 
         socket.emit('all_rooms', allRooms);
+    }
+
+    private getSocketIdInRoom(username: string, roomID: string): string | null {
+        const allClients = this.socketServer.sockets.sockets;
+        const roomClients = this.socketServer.sockets.adapter.rooms.get(roomID);
+        if (!roomClients) {
+            return null;
+        }
+
+        for (const clientId of roomClients) {
+            const clientObject = allClients.get(clientId);
+
+            if (clientObject?.data.username === username) {
+                return clientId;
+            }
+        }
+
+        return null;
     }
 
     private checkIfRoomExists(roomID: string): boolean {
@@ -163,5 +185,18 @@ export default class SocketMessaingController {
 
         console.log(`${username} sent: ${message} to: ${currentRoom}`);
         this.socketServer.to(currentRoom).emit('message_recieved', messageData);
+    }
+
+    private kick(socket: ClientMessageSocket, username: string, reason: string): void {
+        const { username: permittedUsername = 'USER', rank = 'user' } = socket.data;
+        const currentRoom = [...socket.rooms][1];
+
+        const kickedSocketId = this.getSocketIdInRoom(username, currentRoom);
+        if (!kickedSocketId) {
+            return; // TODO: handle
+        }
+
+        const test = this.socketServer.sockets.sockets.get(kickedSocketId);
+        test?.leave(currentRoom);
     }
 }
