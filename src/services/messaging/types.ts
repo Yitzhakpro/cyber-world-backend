@@ -3,10 +3,13 @@ import { Rank } from '../../models';
 // util types
 export type EnterMode = 'create' | 'join';
 
+type Action = 'join' | 'leave' | 'message';
+
 export interface MessageData {
     id: string;
     username: string;
     rank: string;
+    action: Action;
     text: string;
     timestamp: Date;
 }

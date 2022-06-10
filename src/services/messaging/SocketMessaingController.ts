@@ -143,6 +143,7 @@ export default class SocketMessaingController {
             id: nanoid(),
             username,
             rank,
+            action: 'join',
             text: 'Joined the room',
             timestamp: new Date(),
         };
@@ -165,6 +166,7 @@ export default class SocketMessaingController {
             id: nanoid(),
             username,
             rank,
+            action: 'leave',
             text: 'Left the room',
             timestamp: new Date(),
         };
@@ -180,6 +182,7 @@ export default class SocketMessaingController {
             id: nanoid(),
             username,
             rank,
+            action: 'message',
             text: message,
             timestamp: new Date(),
         };
