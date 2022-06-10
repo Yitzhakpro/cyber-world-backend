@@ -35,6 +35,9 @@ export interface ClientToServerEvents {
     enter_room: (roomID: string, enterMode: EnterMode) => void;
     leave_room: () => void;
     message: (message: string) => void;
+
+    // commands
+    kick: (username: string, reason?: string) => void;
 }
 
 export interface ServerToClientEvents {
