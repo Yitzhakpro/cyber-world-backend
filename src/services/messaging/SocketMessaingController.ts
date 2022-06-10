@@ -4,7 +4,7 @@ import { JWT } from '@fastify/jwt';
 import Cookie from 'cookie';
 import { nanoid } from 'nanoid';
 import { verifySavedToken } from '@utils';
-import { getAllRooms } from './utils';
+import { parseServerRooms } from './utils';
 import { UserDecodedToken } from '@types';
 import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, EnterMode, MessageData } from './types';
 
@@ -83,9 +83,30 @@ export default class SocketMessaingController {
 
     private getAllRooms(socket: ClientMessageSocket): void {
         const socketServerRooms = this.socketServer.sockets.adapter.rooms;
-        const allRooms = getAllRooms(socketServerRooms);
+        const allRooms = parseServerRooms(socketServerRooms);
 
         socket.emit('all_rooms', allRooms);
+    }
+
+    private getRoomUsers(roomID: string): SocketUserData[] {
+        const roomUsernames: SocketUserData[] = [];
+        const allSockets = this.socketServer.sockets.sockets;
+        const roomSocketIds = this.socketServer.sockets.adapter.rooms.get(roomID);
+        if (!roomSocketIds) {
+            return [];
+        }
+
+        for (const socketId of roomSocketIds) {
+            const socketObject = allSockets.get(socketId);
+            if (!socketObject) {
+                continue;
+            }
+
+            const { username = 'USER', rank = 'user' } = socketObject.data;
+            roomUsernames.push({ username, rank });
+        }
+
+        return roomUsernames;
     }
 
     private checkIfRoomExists(roomID: string): boolean {
@@ -129,7 +150,9 @@ export default class SocketMessaingController {
         socket.join(roomID);
         console.log(`[v] '${socket.data.username}' joined room: ${roomID}`);
         socket.to(roomID).emit('message_recieved', joinMessage);
-        return socket.emit('joined_successfully');
+
+        const roomUsers = this.getRoomUsers(roomID);
+        return socket.emit('joined_successfully', roomUsers);
     }
 
     private leaveRoom(socket: ClientMessageSocket): void {

@@ -1,4 +1,4 @@
-export const getAllRooms = (adapterRooms: Map<string, Set<string>>): string[] => {
+export const parseServerRooms = (adapterRooms: Map<string, Set<string>>): string[] => {
     const allRooms: string[] = [];
 
     adapterRooms.forEach((roomMembers, room) => {

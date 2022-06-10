@@ -33,7 +33,7 @@ export interface ServerToClientEvents {
     all_rooms: (allRooms: string[]) => void;
     // join logic
     join_failed: (reason: string) => void;
-    joined_successfully: () => void;
+    joined_successfully: (roomInfo: SocketUserData[]) => void;
     // message logic
     message_recieved: (message: MessageData) => void;
 }
