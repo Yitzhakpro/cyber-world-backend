@@ -3,10 +3,18 @@ import { Rank } from '../../models';
 // util types
 export type EnterMode = 'create' | 'join';
 
+export interface RoomSummeryInfo {
+    name: string;
+    usersCount: number;
+}
+
+type Action = 'join' | 'leave' | 'message';
+
 export interface MessageData {
     id: string;
     username: string;
     rank: string;
+    action: Action;
     text: string;
     timestamp: Date;
 }
@@ -30,10 +38,10 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
-    all_rooms: (allRooms: string[]) => void;
+    all_rooms: (allRooms: RoomSummeryInfo[]) => void;
     // join logic
     join_failed: (reason: string) => void;
-    joined_successfully: () => void;
+    joined_successfully: (roomInfo: SocketUserData[]) => void;
     // message logic
     message_recieved: (message: MessageData) => void;
 }
