@@ -81,13 +81,6 @@ export default class SocketMessaingController {
         });
     }
 
-    private getAllRooms(socket: ClientMessageSocket): void {
-        const socketServerRooms = this.socketServer.sockets.adapter.rooms;
-        const allRooms = parseServerRooms(socketServerRooms);
-
-        socket.emit('all_rooms', allRooms);
-    }
-
     private getRoomUsers(roomID: string): SocketUserData[] {
         const roomUsernames: SocketUserData[] = [];
         const allSockets = this.socketServer.sockets.sockets;
@@ -123,6 +116,13 @@ export default class SocketMessaingController {
         }
 
         return false;
+    }
+
+    private getAllRooms(socket: ClientMessageSocket): void {
+        const socketServerRooms = this.socketServer.sockets.adapter.rooms;
+        const allRooms = parseServerRooms(socketServerRooms);
+
+        socket.emit('all_rooms', allRooms);
     }
 
     private enterRoom(roomID: string, enterMode: EnterMode, socket: ClientMessageSocket): boolean {
