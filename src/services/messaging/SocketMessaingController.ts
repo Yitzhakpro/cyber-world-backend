@@ -217,12 +217,29 @@ export default class SocketMessaingController {
         const { username: permittedUsername = 'USER', rank = 'user' } = socket.data;
         const currentRoom = [...socket.rooms][1];
 
+        console.log(`${permittedUsername} tried to kick: ${username}, reason: ${reason}`);
+
         const kickedSocketId = this.getSocketIdInRoom(username, currentRoom);
         if (!kickedSocketId) {
-            return; // TODO: handle
+            socket.emit('kick_failed', `Can't kick ${username} because this username is wrong / not in the room`);
+            return;
         }
 
-        const test = this.socketServer.sockets.sockets.get(kickedSocketId);
-        test?.leave(currentRoom);
+        const kickedSocket = this.socketServer.sockets.sockets.get(kickedSocketId);
+        if (kickedSocket) {
+            kickedSocket.leave(currentRoom);
+            const { rank = 'user' } = kickedSocket.data;
+
+            const kickData: MessageData = {
+                id: nanoid(),
+                username,
+                rank,
+                action: 'leave',
+                text: `was kicked by ${permittedUsername}, reason: ${reason}`,
+                timestamp: new Date(),
+            };
+
+            this.socketServer.to(currentRoom).emit('message_recieved', kickData);
+        }
     }
 }

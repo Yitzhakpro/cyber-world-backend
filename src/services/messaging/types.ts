@@ -47,4 +47,7 @@ export interface ServerToClientEvents {
     joined_successfully: (roomInfo: SocketUserData[]) => void;
     // message logic
     message_recieved: (message: MessageData) => void;
+
+    // commands
+    kick_failed: (reason: string) => void;
 }
