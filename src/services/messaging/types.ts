@@ -49,5 +49,6 @@ export interface ServerToClientEvents {
     message_recieved: (message: MessageData) => void;
 
     // commands
+    got_kicked: (reason: string) => void;
     kick_failed: (reason: string) => void;
 }

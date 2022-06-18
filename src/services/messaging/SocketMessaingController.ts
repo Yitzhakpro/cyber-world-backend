@@ -228,6 +228,8 @@ export default class SocketMessaingController {
         const kickedSocket = this.socketServer.sockets.sockets.get(kickedSocketId);
         if (kickedSocket) {
             kickedSocket.leave(currentRoom);
+            kickedSocket.emit('got_kicked', reason);
+
             const { rank = 'user' } = kickedSocket.data;
 
             const kickData: MessageData = {
