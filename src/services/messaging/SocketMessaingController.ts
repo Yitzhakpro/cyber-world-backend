@@ -7,6 +7,7 @@ import { verifySavedToken } from '@utils';
 import { parseServerRooms } from './utils';
 import { UserDecodedToken } from '@types';
 import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, EnterMode, MessageData } from './types';
+import { Rank } from '../../models';
 
 // TODO: better error handling
 
@@ -69,6 +70,13 @@ export default class SocketMessaingController {
                 this.sendMessage(socket, message);
             });
 
+            socket.on('kick', (username, reason = 'no reason') => {
+                const allowedToKick = this.allowToUseCommand(socket);
+                if (allowedToKick) {
+                    this.kick(socket, username, reason);
+                }
+            });
+
             socket.on('disconnecting', () => {
                 this.leaveRoom(socket);
             });
@@ -79,6 +87,18 @@ export default class SocketMessaingController {
                 console.log(`[${rank}]${username} disconncted, reason: ${reason}`);
             });
         });
+    }
+
+    // TODO: think of a better solution (middlware for example)
+    private allowToUseCommand(socket: ClientMessageSocket): boolean {
+        const { rank = 'user' } = socket.data;
+        const allowedRanks: Rank[] = ['owner', 'mod'];
+
+        if (allowedRanks.includes(rank)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private getRoomUsers(roomID: string): SocketUserData[] {
@@ -100,6 +120,24 @@ export default class SocketMessaingController {
         }
 
         return roomUsernames;
+    }
+
+    private getSocketIdInRoom(username: string, roomID: string): string | null {
+        const allClients = this.socketServer.sockets.sockets;
+        const roomClients = this.socketServer.sockets.adapter.rooms.get(roomID);
+        if (!roomClients) {
+            return null;
+        }
+
+        for (const clientId of roomClients) {
+            const clientObject = allClients.get(clientId);
+
+            if (clientObject?.data.username === username) {
+                return clientId;
+            }
+        }
+
+        return null;
     }
 
     private checkIfRoomExists(roomID: string): boolean {
@@ -189,5 +227,37 @@ export default class SocketMessaingController {
 
         console.log(`${username} sent: ${message} to: ${currentRoom}`);
         this.socketServer.to(currentRoom).emit('message_recieved', messageData);
+    }
+
+    private kick(socket: ClientMessageSocket, username: string, reason: string): void {
+        const { username: permittedUsername = 'USER' } = socket.data;
+        const currentRoom = [...socket.rooms][1];
+
+        console.log(`${permittedUsername} tried to kick: ${username}, reason: ${reason}`);
+
+        const kickedSocketId = this.getSocketIdInRoom(username, currentRoom);
+        if (!kickedSocketId) {
+            socket.emit('kick_failed', `Can't kick ${username} because this username is wrong / not in the room`);
+            return;
+        }
+
+        const kickedSocket = this.socketServer.sockets.sockets.get(kickedSocketId);
+        if (kickedSocket) {
+            kickedSocket.leave(currentRoom);
+            kickedSocket.emit('got_kicked', reason);
+
+            const { rank = 'user' } = kickedSocket.data;
+
+            const kickData: MessageData = {
+                id: nanoid(),
+                username,
+                rank,
+                action: 'leave',
+                text: `was kicked by ${permittedUsername}, reason: ${reason}`,
+                timestamp: new Date(),
+            };
+
+            this.socketServer.to(currentRoom).emit('message_recieved', kickData);
+        }
     }
 }

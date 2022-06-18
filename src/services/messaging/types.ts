@@ -35,6 +35,9 @@ export interface ClientToServerEvents {
     enter_room: (roomID: string, enterMode: EnterMode) => void;
     leave_room: () => void;
     message: (message: string) => void;
+
+    // commands
+    kick: (username: string, reason?: string) => void;
 }
 
 export interface ServerToClientEvents {
@@ -44,4 +47,8 @@ export interface ServerToClientEvents {
     joined_successfully: (roomInfo: SocketUserData[]) => void;
     // message logic
     message_recieved: (message: MessageData) => void;
+
+    // commands
+    got_kicked: (reason: string) => void;
+    kick_failed: (reason: string) => void;
 }
