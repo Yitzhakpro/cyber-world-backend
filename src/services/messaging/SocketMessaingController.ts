@@ -7,6 +7,7 @@ import { verifySavedToken } from '@utils';
 import { parseServerRooms } from './utils';
 import { UserDecodedToken } from '@types';
 import { ClientToServerEvents, ServerToClientEvents, SocketUserData, SocketCookies, EnterMode, MessageData } from './types';
+import { Rank } from '../../models';
 
 // TODO: better error handling
 
@@ -70,7 +71,10 @@ export default class SocketMessaingController {
             });
 
             socket.on('kick', (username, reason = 'no reason') => {
-                this.kick(socket, username, reason);
+                const allowedToKick = this.allowToUseCommand(socket);
+                if (allowedToKick) {
+                    this.kick(socket, username, reason);
+                }
             });
 
             socket.on('disconnecting', () => {
@@ -83,6 +87,18 @@ export default class SocketMessaingController {
                 console.log(`[${rank}]${username} disconncted, reason: ${reason}`);
             });
         });
+    }
+
+    // TODO: think of a better solution (middlware for example)
+    private allowToUseCommand(socket: ClientMessageSocket): boolean {
+        const { rank = 'user' } = socket.data;
+        const allowedRanks: Rank[] = ['owner', 'mod'];
+
+        if (allowedRanks.includes(rank)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private getRoomUsers(roomID: string): SocketUserData[] {
